@@ -57,11 +57,39 @@ public:
 	virtual action take_action(const board& after) {
 		int space[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 		std::shuffle(space, space + 16, engine);
+
+		std::uniform_int_distribution<int> popup(0, 4);
+		int tile = popup(engine) ? 1 : 3;
+
+		int min = INT_MAX;
+		int min_position = 0;
+
 		for (int pos : space) {
 			if (after(pos) != 0) continue;
-			std::uniform_int_distribution<int> popup(0, 9);
-			int tile = popup(engine) ? 1 : 2;
-			return action::place(tile, pos);
+			
+			board sim_before = after;
+			action env_move = action::place(tile,pos);
+			env_move.apply(sim_before);  //check invalid?
+			//int opcode = ((tile<<4)|(pos));
+			//sim_before(opcode & 0x0f) = (opcode >> 4);
+			int max = INT_MIN;
+			int max_action = 0;
+			for (int i=0;i<4;i++)
+			{
+				double value = evaluate(sim_before,i);
+				if (value > max)
+				{
+					max = value;
+					max_action = i;
+				}
+			}
+			if (max < min)
+			{
+				min = max;
+				min_position = pos;
+			}
+
+			return action::place(tile, min_position);
 		}
 		return action();
 	}

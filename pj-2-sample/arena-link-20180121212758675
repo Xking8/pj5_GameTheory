@@ -1,0 +1,2 @@
+#!/bin/bash
+./arena-ctrl /tmp/arena-link-20180121212758675-i /tmp/arena-link-20180121212758675-o "<< "
